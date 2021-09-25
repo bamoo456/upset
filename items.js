@@ -80,7 +80,8 @@ function plotSelectedItems( elementId, selection ) {
     */
     selection.filterCollection.renderController(d3.select("filters-controller"));
 
-    var table = element.append("table");
+
+    var table = element.append("table").attr('id', 'query-result');
     var thead = table.append("thead");
     var tbody = table.append("tbody");
 
@@ -91,7 +92,7 @@ function plotSelectedItems( elementId, selection ) {
     thead.append("tr")
             .selectAll("th")
             .data(attributes.slice(0,attributes.length-1)) // don't show set column
-        .enter()
+            .enter()
             .append("th")
                 .style("background-color", 'rgba(' + ( ( ( selectionColor << 8 ) >> 24 ) >>>0 ) + ',' + ( ( ( selectionColor << 16 ) >> 24 ) >>> 0 ) + ',' + ( ( selectionColor << 24 ) >>> 24 ) + ', 0.5)' )
                 .style("border-bottom", "3px solid " + selections.getColor( selection ) )
@@ -128,13 +129,30 @@ function plotSelectedItems( elementId, selection ) {
 
     var rows = tbody.selectAll("tr")
             .data(selection.items.slice(0,100))
-        .enter()
+            .enter()
             .append("tr")
             .each(function(d,i) {
                 d3.select(this).selectAll("td")
                     .data(attributes.slice(0,attributes.length-1))
-                .enter()
+                    .enter()
                     .append("td")
                     .text(function(a) { return a.values[selection.items[i]] });
             });
+    
+    const queryTable = $("#query-result")
+    console.log('--> ', queryTable);
+
+    if (queryTable) {
+        const $button = $("<button type='button'>");
+        $button.text("Export to CSV");
+        $button.insertBefore(queryTable);
+
+        $button.click(function () {
+            const csv = queryTable.table2CSV({
+                delivery: 'value'
+            });
+            window.location.href = 'data:text/csv;charset=UTF-8,' 
+            + encodeURIComponent(csv);
+        });
+    }
 }
